@@ -1,4 +1,4 @@
-package Lists
+package MyArrayList
 
 import (
 	"errors"
@@ -6,12 +6,12 @@ import (
 	"sort"
 )
 
-const defaultCap = 10
-
 var incorrectIndexErr = errors.New("incorrect index")
 var incorrectElementType = errors.New("incorrect added element type")
 var dataIsEmptyErr = errors.New("data is empty, cannot pick/delete any element")
 var incorrectLessFunction = errors.New("incorrect less function")
+
+const defaultCap = 10
 
 type myArrayList struct {
 	data     []any
@@ -21,8 +21,8 @@ type myArrayList struct {
 
 type al myArrayList
 
-func NewMyArrayList() al {
-	return al{
+func NewArrayList() *al {
+	return &al{
 		data:     make([]any, defaultCap, defaultCap),
 		listType: nil,
 		size:     0,
@@ -151,8 +151,12 @@ func (l *al) Remove(index int) error {
 	if index >= l.size || index < 0 {
 		return incorrectIndexErr
 	}
-	newData := append(l.data[:index], l.data[index+1:])
-	l.data = newData
+	for i := index + 1; i <= l.size-1; i++ {
+		l.data[i-1] = l.data[i]
+	}
+	// Clear ell
+	l.data[l.size-1] = nil
+	l.size--
 	return nil
 }
 
@@ -163,8 +167,9 @@ func (l *al) RemoveFirst() error {
 
 func (l *al) RemoveLast() error {
 	removedIndex := l.size - 1
-	err := l.Remove(removedIndex)
-	return err
+	l.data[removedIndex] = nil
+	l.size--
+	return nil
 }
 
 // ToArray func
@@ -269,22 +274,24 @@ func (l *al) LastIndexOf(searchedEl any) (int, error) {
 	return returnedIndex, nil
 }
 
-func (l *al) Exists(searchedEl any) (bool, error) {
+func (l *al) Exists(searchedEl any) bool {
 	if l.size == 0 {
-		return false, dataIsEmptyErr
+		return false
 	}
-
 	if !l.validateType(searchedEl) {
-		return false, incorrectElementType
+		return false
 	}
 
-	for _, el := range l.data {
+	for i, el := range l.data {
+		if i == l.size {
+			break
+		}
 		if reflect.DeepEqual(el, searchedEl) {
-			return true, nil
+			return true
 		}
 	}
 
-	return false, nil
+	return false
 }
 
 // Other functions
