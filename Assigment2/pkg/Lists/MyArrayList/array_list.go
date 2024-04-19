@@ -13,23 +13,21 @@ var incorrectLessFunction = errors.New("incorrect less function")
 
 const defaultCap = 10
 
-type myArrayList struct {
+type MyArrayList struct {
 	data     []any
 	listType reflect.Type
 	size     int
 }
 
-type al myArrayList
-
-func NewArrayList() *al {
-	return &al{
+func NewArrayList() *MyArrayList {
+	return &MyArrayList{
 		data:     make([]any, defaultCap, defaultCap),
 		listType: nil,
 		size:     0,
 	}
 }
 
-func (l *al) increaseCap() {
+func (l *MyArrayList) increaseCap() {
 	newCap := l.size * 2
 	newData := make([]any, newCap, newCap)
 
@@ -41,7 +39,7 @@ func (l *al) increaseCap() {
 }
 
 // true, if l.listType == el.type, or l.listType == nil
-func (l *al) validateType(el any) bool {
+func (l *MyArrayList) validateType(el any) bool {
 	if l.listType == nil {
 		return true
 	}
@@ -49,16 +47,16 @@ func (l *al) validateType(el any) bool {
 }
 
 // Standing and checking standing list type
-func (l *al) standListType(refEl any) {
+func (l *MyArrayList) standListType(refEl any) {
 	l.listType = reflect.ValueOf(refEl).Type()
 }
 
-func (l *al) needStandListType() bool {
+func (l *MyArrayList) needStandListType() bool {
 	return l.size == 0 && l.listType == nil
 }
 
 // Add functions
-func (l *al) Add(newEl any, indexToAdd int) error {
+func (l *MyArrayList) Add(newEl any, indexToAdd int) error {
 	if indexToAdd > l.size || indexToAdd < 0 {
 		return incorrectIndexErr
 	}
@@ -86,7 +84,7 @@ func (l *al) Add(newEl any, indexToAdd int) error {
 	return nil
 }
 
-func (l *al) AddLast(newEl any) error {
+func (l *MyArrayList) AddLast(newEl any) error {
 	if ok := l.validateType(newEl); !ok {
 		return incorrectElementType
 	}
@@ -102,7 +100,7 @@ func (l *al) AddLast(newEl any) error {
 	return nil
 }
 
-func (l *al) AddFirst(newEl any) error {
+func (l *MyArrayList) AddFirst(newEl any) error {
 	if ok := l.validateType(newEl); !ok {
 		return incorrectElementType
 	}
@@ -119,7 +117,7 @@ func (l *al) AddFirst(newEl any) error {
 }
 
 // Get functions
-func (l *al) Get(index int) (any, error) {
+func (l *MyArrayList) Get(index int) (any, error) {
 	if l.size == 0 {
 		return nil, dataIsEmptyErr
 	}
@@ -129,14 +127,14 @@ func (l *al) Get(index int) (any, error) {
 	return l.data[index], nil
 }
 
-func (l *al) GetFirst() (any, error) {
+func (l *MyArrayList) GetFirst() (any, error) {
 	if l.size == 0 {
 		return nil, dataIsEmptyErr
 	}
 	return l.data[0], nil
 }
 
-func (l *al) GetLast() (any, error) {
+func (l *MyArrayList) GetLast() (any, error) {
 	if l.size == 0 {
 		return nil, dataIsEmptyErr
 	}
@@ -144,7 +142,7 @@ func (l *al) GetLast() (any, error) {
 }
 
 // Remove functions
-func (l *al) Remove(index int) error {
+func (l *MyArrayList) Remove(index int) error {
 	if l.size == 0 {
 		return dataIsEmptyErr
 	}
@@ -160,12 +158,12 @@ func (l *al) Remove(index int) error {
 	return nil
 }
 
-func (l *al) RemoveFirst() error {
+func (l *MyArrayList) RemoveFirst() error {
 	err := l.Remove(0)
 	return err
 }
 
-func (l *al) RemoveLast() error {
+func (l *MyArrayList) RemoveLast() error {
 	removedIndex := l.size - 1
 	l.data[removedIndex] = nil
 	l.size--
@@ -173,7 +171,7 @@ func (l *al) RemoveLast() error {
 }
 
 // ToArray func
-func (l *al) ToArray() []any {
+func (l *MyArrayList) ToArray() []any {
 	if l.size == 0 {
 		return []any{}
 	}
@@ -197,7 +195,7 @@ func isCorrectLessFunction(x any, cmp func(i, j any) bool) bool {
 	return ok
 }
 
-func (l *al) Sort(cmp func(i, j any) bool) error {
+func (l *MyArrayList) Sort(cmp func(i, j any) bool) error {
 	// Copying array to not sorting interface{} (empty) els
 	elsMsv := l.ToArray()
 	// If length is 0, return
@@ -224,7 +222,7 @@ func (l *al) Sort(cmp func(i, j any) bool) error {
 }
 
 // Set function
-func (l *al) Set(val any, index int) error {
+func (l *MyArrayList) Set(val any, index int) error {
 	if l.size == 0 {
 		return dataIsEmptyErr
 	}
@@ -239,7 +237,7 @@ func (l *al) Set(val any, index int) error {
 }
 
 // Finding function
-func (l *al) IndexOf(searchedEl any) (int, error) {
+func (l *MyArrayList) IndexOf(searchedEl any) (int, error) {
 	if l.size == 0 {
 		return -1, dataIsEmptyErr
 	}
@@ -256,7 +254,7 @@ func (l *al) IndexOf(searchedEl any) (int, error) {
 	return -1, nil
 }
 
-func (l *al) LastIndexOf(searchedEl any) (int, error) {
+func (l *MyArrayList) LastIndexOf(searchedEl any) (int, error) {
 	if l.size == 0 {
 		return -1, dataIsEmptyErr
 	}
@@ -274,7 +272,7 @@ func (l *al) LastIndexOf(searchedEl any) (int, error) {
 	return returnedIndex, nil
 }
 
-func (l *al) Exists(searchedEl any) bool {
+func (l *MyArrayList) Exists(searchedEl any) bool {
 	if l.size == 0 {
 		return false
 	}
@@ -295,17 +293,14 @@ func (l *al) Exists(searchedEl any) bool {
 }
 
 // Other functions
-func (l *al) Clear() {
-	*l = al{
-		data: make([]any, defaultCap, defaultCap),
-		size: 0,
-	}
+func (l *MyArrayList) Clear() {
+	*l = *NewArrayList()
 }
 
-func (l *al) GetType() reflect.Type {
+func (l *MyArrayList) GetType() reflect.Type {
 	return l.listType
 }
 
-func (l *al) Size() int {
+func (l *MyArrayList) Size() int {
 	return l.size
 }

@@ -19,7 +19,7 @@ var internalTestErr = errors.New(" internal error in getTestingIntArr function")
 
 // / !!!!
 // / !!!!
-var testingType = "ArrayList" // Each one of LinkedList or ArrayList. It types of list will be testing
+var testingType = "LinkedList" // Each one of LinkedList or ArrayList. It types of list will be testing
 // I don't know why, but Goland frowns on the function
 // GetExampleA function, IDE does not see it, but everything goes smoothly when running tests.
 

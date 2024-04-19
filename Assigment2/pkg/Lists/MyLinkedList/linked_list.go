@@ -19,15 +19,13 @@ type node struct {
 	prev *node
 }
 
-type ll MyLinkedList
-
 var incorrectIndexErr = errors.New("incorrect index")
 var incorrectElementType = errors.New("incorrect added element type")
 var dataIsEmptyErr = errors.New("data is empty, cannot pick/delete any element")
 var incorrectLessFunction = errors.New("incorrect less function")
 
-func NewLinkedList() *ll {
-	return &ll{
+func NewLinkedList() *MyLinkedList {
+	return &MyLinkedList{
 		head: nil,
 		tail: nil,
 		size: 0,
@@ -35,22 +33,22 @@ func NewLinkedList() *ll {
 }
 
 // true, if l.listType == el.type, or l.listType == nil
-func (l *ll) validateType(el any) bool {
+func (l *MyLinkedList) validateType(el any) bool {
 	if l.listType == nil {
 		return true
 	}
 	return !(reflect.ValueOf(el).Type() != l.listType)
 }
 
-func (l *ll) standListType(refEl any) {
+func (l *MyLinkedList) standListType(refEl any) {
 	l.listType = reflect.ValueOf(refEl).Type()
 }
 
-func (l *ll) needStandListType() bool {
+func (l *MyLinkedList) needStandListType() bool {
 	return l.size == 0 && l.listType == nil
 }
 
-func (l *ll) initNewLinkedListWithOneNode(newEl any) error {
+func (l *MyLinkedList) initNewLinkedListWithOneNode(newEl any) error {
 	if !(l.validateType(newEl)) {
 		return incorrectElementType
 	}
@@ -68,7 +66,7 @@ func (l *ll) initNewLinkedListWithOneNode(newEl any) error {
 	return nil
 }
 
-func (l *ll) Add(newEl any, indexToAdd int) error {
+func (l *MyLinkedList) Add(newEl any, indexToAdd int) error {
 	if indexToAdd > l.size || indexToAdd < 0 {
 		return incorrectIndexErr
 	}
@@ -107,7 +105,7 @@ func (l *ll) Add(newEl any, indexToAdd int) error {
 	return nil
 }
 
-func (l *ll) AddLast(newEl any) error {
+func (l *MyLinkedList) AddLast(newEl any) error {
 	if ok := l.validateType(newEl); !ok {
 		return incorrectElementType
 	}
@@ -130,7 +128,7 @@ func (l *ll) AddLast(newEl any) error {
 	return nil
 }
 
-func (l *ll) AddFirst(newEl any) error {
+func (l *MyLinkedList) AddFirst(newEl any) error {
 	if ok := l.validateType(newEl); !ok {
 		return incorrectElementType
 	}
@@ -154,7 +152,7 @@ func (l *ll) AddFirst(newEl any) error {
 }
 
 // Get functions
-func (l *ll) Get(index int) (any, error) {
+func (l *MyLinkedList) Get(index int) (any, error) {
 	if l.size == 0 {
 		return nil, dataIsEmptyErr
 	}
@@ -168,14 +166,14 @@ func (l *ll) Get(index int) (any, error) {
 	return copyHead.val, nil
 }
 
-func (l *ll) GetFirst() (any, error) {
+func (l *MyLinkedList) GetFirst() (any, error) {
 	if l.size == 0 {
 		return nil, dataIsEmptyErr
 	}
 	return l.head.val, nil
 }
 
-func (l *ll) GetLast() (any, error) {
+func (l *MyLinkedList) GetLast() (any, error) {
 	if l.size == 0 {
 		return nil, dataIsEmptyErr
 	}
@@ -184,7 +182,7 @@ func (l *ll) GetLast() (any, error) {
 
 // Remove functions
 
-func (l *ll) removeOneEl() error {
+func (l *MyLinkedList) removeOneEl() error {
 	if l.size != 1 {
 		return errors.New("unexpected function call that deletes a single value")
 	}
@@ -192,7 +190,7 @@ func (l *ll) removeOneEl() error {
 	return nil
 }
 
-func (l *ll) Remove(index int) error {
+func (l *MyLinkedList) Remove(index int) error {
 	if l.size == 0 {
 		return dataIsEmptyErr
 	}
@@ -217,7 +215,7 @@ func (l *ll) Remove(index int) error {
 	return nil
 }
 
-func (l *ll) RemoveFirst() error {
+func (l *MyLinkedList) RemoveFirst() error {
 	if l.size == 0 {
 		return dataIsEmptyErr
 	}
@@ -232,7 +230,7 @@ func (l *ll) RemoveFirst() error {
 	return nil
 }
 
-func (l *ll) RemoveLast() error {
+func (l *MyLinkedList) RemoveLast() error {
 	if l.size == 0 {
 		return dataIsEmptyErr
 	}
@@ -249,7 +247,7 @@ func (l *ll) RemoveLast() error {
 }
 
 // ToArray Func
-func (l *ll) ToArray() []any {
+func (l *MyLinkedList) ToArray() []any {
 	if l.size == 0 {
 		return []any{}
 	}
@@ -273,7 +271,7 @@ func isCorrectLessFunction(x any, cmp func(i, j any) bool) bool {
 	return ok
 }
 
-func (l *ll) Sort(cmp func(i, j any) bool) error {
+func (l *MyLinkedList) Sort(cmp func(i, j any) bool) error {
 	// Copying array to not sorting interface{} (empty) els
 	elsMsv := l.ToArray()
 	// If length is 0, return
@@ -304,7 +302,7 @@ func (l *ll) Sort(cmp func(i, j any) bool) error {
 }
 
 // Set func
-func (l *ll) Set(setEl any, index int) error {
+func (l *MyLinkedList) Set(setEl any, index int) error {
 	if l.size == 0 {
 		return dataIsEmptyErr
 	}
@@ -324,7 +322,7 @@ func (l *ll) Set(setEl any, index int) error {
 }
 
 // Searching all functions
-func (l *ll) IndexOf(searchedEl any) (int, error) {
+func (l *MyLinkedList) IndexOf(searchedEl any) (int, error) {
 	if l.size == 0 {
 		return -1, dataIsEmptyErr
 	}
@@ -344,7 +342,7 @@ func (l *ll) IndexOf(searchedEl any) (int, error) {
 	return -1, nil
 }
 
-func (l *ll) LastIndexOf(searchedEl any) (int, error) {
+func (l *MyLinkedList) LastIndexOf(searchedEl any) (int, error) {
 	if l.size == 0 {
 		return -1, dataIsEmptyErr
 	}
@@ -364,7 +362,7 @@ func (l *ll) LastIndexOf(searchedEl any) (int, error) {
 	return mxCounter, nil
 }
 
-func (l *ll) Exists(searchedEl any) bool {
+func (l *MyLinkedList) Exists(searchedEl any) bool {
 	if l.size == 0 {
 		return false
 	}
@@ -383,16 +381,16 @@ func (l *ll) Exists(searchedEl any) bool {
 }
 
 // Other functions
-func (l *ll) Clear() {
+func (l *MyLinkedList) Clear() {
 	l.head = nil
 	l.tail = nil
 	l.size = 0
 }
 
-func (l *ll) GetType() reflect.Type {
+func (l *MyLinkedList) GetType() reflect.Type {
 	return l.listType
 }
 
-func (l *ll) Size() int {
+func (l *MyLinkedList) Size() int {
 	return l.size
 }
