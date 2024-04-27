@@ -3,11 +3,13 @@ package Lists
 import (
 	"errors"
 	"fmt"
-	rnd "github.com/https-whoyan/ADS/tree/main/Assigment2/pkg/Random"
-	"github.com/stretchr/testify/assert"
 	"reflect"
 	"sort"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	rnd "github.com/https-whoyan/ADS/tree/main/Assigment2/pkg/Random"
 )
 
 // Err, which tells you that the test was not expecting

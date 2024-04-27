@@ -2,9 +2,10 @@ package Lists
 
 import (
 	"errors"
+	"reflect"
+
 	arrList "github.com/https-whoyan/ADS/tree/main/Assigment2/pkg/Lists/MyArrayList"
 	linkList "github.com/https-whoyan/ADS/tree/main/Assigment2/pkg/Lists/MyLinkedList"
-	"reflect"
 )
 
 var incorrectIndexErr = errors.New("incorrect index")
