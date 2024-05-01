@@ -1,6 +1,9 @@
 package Random
 
-import "math"
+import (
+	"math"
+	"math/rand"
+)
 
 // Random Formula, IDK :)
 func RandomFormula(x int) int {
@@ -33,4 +36,16 @@ func GetStruct(i int) *TestStruct {
 		Age:       RandomFormula(i),
 		IsStudent: (i+RandomFormula(i))%2 == 0,
 	}
+}
+
+func ShuffleMp(mp map[int]int) []int {
+	n := len(mp)
+	arr := make([]int, 0, n)
+	for key, _ := range mp {
+		arr = append(arr, key)
+	}
+	rand.Shuffle(n, func(i, j int) {
+		arr[i], arr[j] = arr[j], arr[i]
+	})
+	return arr
 }

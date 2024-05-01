@@ -17,14 +17,12 @@ type node[K ord, V any] struct {
 
 type MyBST[K ord, V any] struct {
 	root *node[K, V]
-	keys map[K]bool
 	size int
 }
 
 func NewMyBST[K ord, V any]() *MyBST[K, V] {
 	return &MyBST[K, V]{
 		root: nil,
-		keys: make(map[K]bool),
 	}
 }
 
@@ -52,8 +50,8 @@ func (n *node[K, V]) appendNode(key K, value V) {
 }
 
 func (b *MyBST[K, V]) ExistKey(key K) bool {
-	_, contains := b.keys[key]
-	return contains
+	_, err := b.Get(key)
+	return err == nil
 }
 
 func (b *MyBST[K, V]) Put(key K, value V) error {
@@ -65,11 +63,9 @@ func (b *MyBST[K, V]) Put(key K, value V) error {
 			key: key,
 			val: value,
 		}
-		b.keys[key] = true
 		b.size++
 		return nil
 	}
-	b.keys[key] = true
 	b.root.appendNode(key, value)
 	b.size++
 	return nil
@@ -97,14 +93,45 @@ func (n *node[K, V]) isLeaf() bool {
 	return n.left == nil && n.right == nil
 }
 
+func (n *node[K, V]) bfsPrint() {
+	stack := []*node[K, V]{n}
+	height := 1
+	var nextStack []*node[K, V]
+	for len(stack) != 0 {
+		fmt.Printf("\nHeight: %v\n", height)
+		for _, v := range stack {
+			fmt.Print(v.key, ": left:")
+			if v.left != nil {
+				fmt.Print(v.left.key)
+			}
+			fmt.Print(", right: ")
+			if v.right != nil {
+				fmt.Print(v.right.key)
+			}
+			fmt.Print(";;;")
+			if v.left != nil {
+				nextStack = append(nextStack, v.left)
+			}
+			if v.right != nil {
+				nextStack = append(nextStack, v.right)
+			}
+		}
+		stack = nextStack
+		nextStack = []*node[K, V]{}
+		height++
+	}
+	fmt.Print("\n========\n")
+}
+
 func (b *MyBST[K, V]) Delete(key K) {
+	//fmt.Printf("\n=======\nDelete %v", key)
+	//b.root.bfsPrint()
 	// If key not contains, break
 	if !b.ExistKey(key) {
 		return
 	}
-	// Update size and keys
+	// Update size
 	b.size--
-	delete(b.keys, key)
 
 	// deleted node function
 	var findDeletedNode func(curr *node[K, V], deletedKey K) *node[K, V]
@@ -118,17 +145,17 @@ func (b *MyBST[K, V]) Delete(key K) {
 		if deletedKey < nodeKey {
 			return findDeletedNode(curr.left, deletedKey)
 		}
-		return findDeletedNode(curr.left, deletedKey)
+		return findDeletedNode(curr.right, deletedKey)
 	}
 	// findParentOfDeletedNode function.
 	// It is necessary to swap values of subtrees
-	var findParentOfDeletedNode func(curr *node[K, V], searchedNode *node[K, V]) (parent *node[K, V], isLeft bool)
-	findParentOfDeletedNode = func(curr *node[K, V], searchedNode *node[K, V]) (parent *node[K, V], isLeft bool) {
+	var findParentOfDeletedNode func(curr *node[K, V], searchedNode *node[K, V]) (parent *node[K, V], isLeaf bool)
+	findParentOfDeletedNode = func(curr *node[K, V], searchedNode *node[K, V]) (parent *node[K, V], isLeaf bool) {
 		// I'm comparing pointers, so it's okay.
 		if curr.left == searchedNode {
-			return curr, true
+			return curr, searchedNode.isLeaf()
 		} else if curr.right == searchedNode {
-			return curr, false
+			return curr, searchedNode.isLeaf()
 		}
 
 		// Recursive call:
@@ -141,7 +168,7 @@ func (b *MyBST[K, V]) Delete(key K) {
 	}
 	var findMinimumKey func(curr *node[K, V]) *node[K, V]
 	findMinimumKey = func(curr *node[K, V]) *node[K, V] {
-		if curr.isLeaf() {
+		if curr.left == nil {
 			return curr
 		}
 		return findMinimumKey(curr.left)
@@ -172,37 +199,58 @@ func (b *MyBST[K, V]) Delete(key K) {
 		// It will be working because I know, that
 		// Every key in right subtree will be large, than every key in left subtree
 		rightSubtreeMinNode := findMinimumKey(b.root.right)
-		rightSubtreeMinNodeParent, isLeft := findParentOfDeletedNode(b.root, rightSubtreeMinNode)
+		minNodeKey := rightSubtreeMinNode.key
+		minNomeValue := rightSubtreeMinNode.val
+		rightSubtreeMinNodeParent, isLeaf := findParentOfDeletedNode(b.root, rightSubtreeMinNode)
 		// Replace parent of minimum key in right subtree node values
-		if isLeft {
-			rightSubtreeMinNodeParent.left = nil
-		} else {
-			rightSubtreeMinNodeParent.right = nil
+		//if minimum node is Leaf, stand parent node left tree nil
+		if isLeaf {
+			isLeft := rightSubtreeMinNodeParent.left == rightSubtreeMinNode
+			if isLeft {
+				rightSubtreeMinNodeParent.left = nil
+			} else {
+				rightSubtreeMinNodeParent.right = nil
+			}
+			// I know, that deletedNode is root of BST
+			// Just replace his key and value
+			b.root.key = minNodeKey
+			b.root.val = minNomeValue
+			return
 		}
+		// Else I stand, that rightSubtreeMinNode haven't a left subtree (rightSubtreeMinNode.left == nil).
+		// But I have a right subtree
+		// Ok, replace rightSubtreeMinNode node to rightSubtreeMinNode.right node
+		// Then, replace parent minimum node right subtree to minNode subtree
+		*rightSubtreeMinNode = *(rightSubtreeMinNode.right)
 		// Ok, done
 		// I know, that deletedNode is root of BST
 		// Just replace his key and value
-		b.root.key = rightSubtreeMinNode.key
-		b.root.val = rightSubtreeMinNode.val
+		b.root.key = minNodeKey
+		b.root.val = minNomeValue
 		// Done deleting, return
 		return
 	}
+	deletedNodeParent, isLeaf := findParentOfDeletedNode(b.root, deletedNode)
 	// If I delete a leaf:
-	deletedNodeParent, isLeft := findParentOfDeletedNode(b.root, deletedNode)
-	if deletedNode.isLeaf() {
+	if isLeaf {
 		// Just replace this node to nil
+		isLeft := deletedNodeParent.left == deletedNode
 		if isLeft {
 			deletedNodeParent.left = nil
+			return
 		}
 		deletedNodeParent.right = nil
-		// Easy, return
 		return
 	}
 	// I've a case that I haven't a right subtree
-	// So easy, replace parent children to deleted node children
-	if deletedNodeParent.right == nil {
-		deletedNodeParent.left = deletedNode.left
-		deletedNodeParent.right = deletedNode.right
+
+	// So easy, replace deleted node to deleted node left subtree root node
+	// And, that's all
+
+	// I can do this, because deletedNode is not a leaf.
+	if deletedNode.right == nil {
+		*(deletedNode) = *(deletedNode.left)
+		return
 	}
 	// I'll find a minimum key in right subtree
 	// Delete a minimum node in right subtree (it will be a leaf)
@@ -211,18 +259,34 @@ func (b *MyBST[K, V]) Delete(key K) {
 	// It will be working because I know, that
 	// Every key in right subtree will be large, than every key in left subtree
 	rightSubtreeMinNode := findMinimumKey(deletedNode.right)
-	rightSubtreeMinNodeParent, isLeft := findParentOfDeletedNode(deletedNode, rightSubtreeMinNode)
+	minNodeKey := rightSubtreeMinNode.key
+	minNomeValue := rightSubtreeMinNode.val
+	rightSubtreeMinNodeParent, isLeaf := findParentOfDeletedNode(deletedNode, rightSubtreeMinNode)
 	// Replace parent of minimum key in right subtree node values
-	if isLeft {
-		rightSubtreeMinNodeParent.left = nil
-	} else {
-		rightSubtreeMinNodeParent.right = nil
+	//if minimum node is Leaf, stand parent node left tree nil
+	if isLeaf {
+		isLeft := rightSubtreeMinNodeParent.left == rightSubtreeMinNode
+		if isLeft {
+			rightSubtreeMinNodeParent.left = nil
+		} else {
+			rightSubtreeMinNodeParent.right = nil
+		}
+		// Just replace his key and value
+		deletedNode.key = minNodeKey
+		deletedNode.val = minNomeValue
+		// Done, return
+		return
 	}
+	// Else I stand, that rightSubtreeMinNode haven't a left subtree (rightSubtreeMinNode.left == nil).
+	// Then, replace parent minimum node right subtree to minNode subtree
+	rightSubtreeMinNodeParent.right = rightSubtreeMinNode.right
 	// Ok, done
-	// Replace deleted node values
-	deletedNode.key = rightSubtreeMinNode.key
-	deletedNode.val = rightSubtreeMinNode.val
-	// Done, return
+	// I know, that deletedNode is root of BST
+	// Just replace his key and value
+	deletedNode.key = minNodeKey
+	deletedNode.val = minNomeValue
+	// Done deleting, return
+	return
 }
 
 type TraversalNode[K ord, V any] struct {
