@@ -45,13 +45,13 @@ func (m *MyHashMap[K, E]) hash(el K) int {
 	var intSalt int
 	// I used ASCII ids
 	// I increment 10 to the degree of the character's index order
-	// And addASCII id of letter
+	// multiply by ASCII id of letter
 	for i, letter := range salt {
 		// I assume that more 5 * m.capacity will give evenly different hashes.
 		if intSalt > 5*m.capacity {
 			break
 		}
-		intSalt += int(math.Pow10(i)) + int(letter)
+		intSalt += int(math.Pow10(i)) * int(letter)
 	}
 	// limit the hash modulus to the size of the hash map
 	intSalt %= m.capacity

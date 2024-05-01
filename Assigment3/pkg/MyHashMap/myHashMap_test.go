@@ -2,34 +2,17 @@ package MyHashMap
 
 import (
 	"errors"
-	"github.com/stretchr/testify/assert"
-	"math"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	rnd "github.com/https-whoyan/ADS/Assigment3/pkg/Random"
 )
 
 const (
 	testingCap         = 200
-	testingAddElsCount = 1123
+	testingAddElsCount = 5000
 )
-
-// Random Formula, IDK :)
-func randomFormula(x int) int {
-	sqrtX := int(math.Sqrt(float64(x)))
-	a := x * (x + 3)
-	b := sqrtX - 5*x
-	myAbs := func(x int) int {
-		if x < 0 {
-			return -1 * x
-		}
-		return x
-	}
-	c := myAbs(a-b) - b/2
-	d := sqrtX * (sqrtX - 6)
-	e := c*(sqrtX-6) - d
-	randomSqrt := int(math.Sqrt(float64(sqrtX + 8)))
-	f := e - x*b - c*randomSqrt
-	return f
-}
 
 func TestMyHashMap_Put(t *testing.T) {
 	t.Run("Put, not error?", func(t *testing.T) {
@@ -42,7 +25,7 @@ func TestMyHashMap_Put(t *testing.T) {
 		mp := NewMyHashMap[int, int](testingCap)
 		// Add Some values
 		for i := 1; i <= testingAddElsCount; i++ {
-			mp.Put(i, randomFormula(i))
+			mp.Put(i, rnd.RandomFormula(i))
 		}
 		assert.Equal(t, nil, err)
 	})
@@ -51,7 +34,7 @@ func TestMyHashMap_Put(t *testing.T) {
 		exceptedSize := 0
 		// Add Some values
 		for i := 1; i <= testingAddElsCount; i++ {
-			haveACollision, _, _ := mp.Put(i, randomFormula(i))
+			haveACollision, _, _ := mp.Put(i, rnd.RandomFormula(i))
 			if !haveACollision {
 				exceptedSize++
 			}
@@ -69,7 +52,7 @@ func TestMyHashMap_Get(t *testing.T) {
 	for i := 1; i <= testingAddElsCount; i++ {
 		// if a have a collision, I'll stand that 'ok, oldKey have an incorrect val, then
 		// I'll skip this key for checking correctly check.
-		haveACollision, oldKey, _ := mp.Put(i, randomFormula(i))
+		haveACollision, oldKey, _ := mp.Put(i, rnd.RandomFormula(i))
 		if haveACollision {
 			collisionsMp[oldKey] = true
 		}
@@ -78,7 +61,7 @@ func TestMyHashMap_Get(t *testing.T) {
 		exceptedMp := make(map[int]int)
 		for i := 1; i <= testingAddElsCount; i++ {
 			if _, contains := collisionsMp[i]; !contains {
-				exceptedMp[i] = randomFormula(i)
+				exceptedMp[i] = rnd.RandomFormula(i)
 			}
 		}
 		actualMp := make(map[int]int)
@@ -106,7 +89,7 @@ func TestMyHashMap_Contains(t *testing.T) {
 	mp := NewMyHashMap[int, int](testingCap)
 	collisionMp := make(map[int]bool)
 	for i := 1; i <= testingAddElsCount; i++ {
-		isCollision, oldKey, _ := mp.Put(i, randomFormula(i))
+		isCollision, oldKey, _ := mp.Put(i, rnd.RandomFormula(i))
 		if isCollision {
 			collisionMp[oldKey] = true
 		}
@@ -152,7 +135,7 @@ func TestMyHashMap_Remove(t *testing.T) {
 	// Add Values
 	mp := NewMyHashMap[int, int](testingCap)
 	for i := 1; i <= testingAddElsCount; i++ {
-		mp.Put(i, randomFormula(i))
+		mp.Put(i, rnd.RandomFormula(i))
 	}
 
 	// I'll be checking before containing because I don't sure
@@ -187,21 +170,8 @@ func TestMyHashMap_Remove(t *testing.T) {
 }
 
 func TestWithStructs(t *testing.T) {
-	type testStruct struct {
-		name      string
-		age       int
-		isStudent bool
-	}
-	getStruct := func(i int) *testStruct {
-		return &testStruct{
-			name:      string(rune(i)),
-			age:       randomFormula(i),
-			isStudent: (i+randomFormula(i))%2 == 0,
-		}
-	}
-
-	getMp := func() *MyHashMap[int, *testStruct] {
-		return NewMyHashMap[int, *testStruct](testingCap)
+	getMp := func() *MyHashMap[int, *rnd.TestStruct] {
+		return NewMyHashMap[int, *rnd.TestStruct](testingCap)
 	}
 
 	t.Run("Put struct elements, isOk?", func(t *testing.T) {
@@ -214,7 +184,7 @@ func TestWithStructs(t *testing.T) {
 		}()
 		for i := 1; i <= testingAddElsCount; i++ {
 
-			mp.Put(i, getStruct(i))
+			mp.Put(i, rnd.GetStruct(i))
 		}
 
 		assert.Equal(t, false, recoveredPanicErr)
@@ -223,18 +193,18 @@ func TestWithStructs(t *testing.T) {
 		mp := getMp()
 		collisionsMp := make(map[int]bool)
 		for i := 1; i <= testingAddElsCount; i++ {
-			haveACollision, oldKey, _ := mp.Put(i, getStruct(i))
+			haveACollision, oldKey, _ := mp.Put(i, rnd.GetStruct(i))
 			if haveACollision {
 				collisionsMp[oldKey] = true
 			}
 		}
-		exceptedMp := make(map[int]*testStruct)
+		exceptedMp := make(map[int]*rnd.TestStruct)
 		for i := 1; i <= testingAddElsCount; i++ {
 			if _, contains := collisionsMp[i]; !contains {
-				exceptedMp[i] = getStruct(i)
+				exceptedMp[i] = rnd.GetStruct(i)
 			}
 		}
-		actualMp := make(map[int]*testStruct)
+		actualMp := make(map[int]*rnd.TestStruct)
 		for i := 1; i <= testingAddElsCount; i++ {
 			if _, contains := collisionsMp[i]; !contains {
 				val, isContains := mp.Get(i)
@@ -250,7 +220,7 @@ func TestWithStructs(t *testing.T) {
 		mp := getMp()
 		collisionsMp := make(map[int]bool)
 		for i := 1; i <= testingAddElsCount; i++ {
-			haveACollision, oldKey, _ := mp.Put(i, getStruct(i))
+			haveACollision, oldKey, _ := mp.Put(i, rnd.GetStruct(i))
 			if haveACollision {
 				collisionsMp[oldKey] = true
 			}
@@ -263,7 +233,7 @@ func TestWithStructs(t *testing.T) {
 			return (testingKey >= 1) && (testingKey <= testingAddElsCount)
 		}
 
-		universalTest := func(mp *MyHashMap[int, *testStruct], testingKey int) (excepted, actual bool) {
+		universalTest := func(mp *MyHashMap[int, *rnd.TestStruct], testingKey int) (excepted, actual bool) {
 			isContains := mp.Contains(testingKey)
 			_, containsInCollisionMp := collisionsMp[testingKey]
 			exceptedContains := FGetExceptedContains(testingKey, containsInCollisionMp)
