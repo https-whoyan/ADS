@@ -1,14 +1,22 @@
 package graph
 
-type AdjacencyListInterface interface {
-	initNewEdge(v Vertex, opt ...float64)
+import "cmp"
+
+type Vertex interface{ cmp.Ordered }
+
+type StoragedV interface{ GetV() }
+
+type AdjacencyListInterface[vertex Vertex] interface {
+	Iterate() <-chan vertex
+	initNewEdge(v vertex, opt ...float64)
+	containsEdge(v vertex, opt ...float64) bool
 }
 
-type GraphInterface interface {
-	AddEdge(v Vertex, u Vertex, opt ...float64)
+type Interface[vertex Vertex] interface {
+	AddEdge(v vertex, u vertex, opt ...float64)
 	GetVerticesCount() int
 	GetEdgesCount() int
-	HasVertex(v Vertex) bool
-	HasEdge(v Vertex, u Vertex, opt ...float64) bool
-	AdjacencyList(v Vertex) AdjacencyListInterface
+	HasVertex(v vertex) bool
+	HasEdge(v vertex, u vertex, opt ...float64) bool
+	InterfaceAdjacencyList(v vertex) AdjacencyListInterface[vertex]
 }

@@ -1,27 +1,13 @@
 package graph
 
-type Vertex any
-
-type edge struct {
-	to Vertex
+type Edge[vType Vertex] struct {
+	U      vType
+	Weight float64
 }
 
-func newEdge(v Vertex) *edge {
-	return &edge{
-		to: v,
-	}
-}
-
-type weighedEdge struct {
-	*edge
-	weight float64
-}
-
-func newWeighedEdge(v Vertex, weight float64) *weighedEdge {
-	return &weighedEdge{
-		edge: &edge{
-			to: v,
-		},
-		weight: weight,
+func NewEdge[vType Vertex](u vType, weight float64) *Edge[vType] {
+	return &Edge[vType]{
+		U:      u,
+		Weight: weight,
 	}
 }
